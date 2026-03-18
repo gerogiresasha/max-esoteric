@@ -124,8 +124,8 @@
 
     if (shareBtn) {
       shareBtn.addEventListener('click', function () {
+        const shareText = `${String(latestResultText || '').slice(0, 140)}...`
         if (IS_MAX) {
-          const shareText = `${String(latestResultText || '').slice(0, 140)}...`
           WebApp.shareMaxContent({ text: shareText, link: APP_LINK })
         } else {
           alert('Шеринг доступен только в приложении Max')
