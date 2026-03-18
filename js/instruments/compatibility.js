@@ -1,4 +1,6 @@
 ;(function () {
+  let latestResultText = ''
+
   function loaderHtml() {
     return `<div class="loader" role="status" aria-label="Загрузка"><span></span><span></span><span></span></div>`
   }
@@ -23,6 +25,7 @@
     const resultText = document.getElementById('comp-result-text')
     const paidBtn = document.getElementById('comp-btn-paid')
     const freeBtn = document.getElementById('comp-btn-free')
+    const shareBtn = document.getElementById('comp-btn-share')
 
     const hasErrors =
       shakeIfEmpty(name1El) ||
@@ -44,10 +47,15 @@
 
     freeBtn.disabled = true
     if (paidBtn) paidBtn.disabled = true
+    if (shareBtn) {
+      shareBtn.style.display = 'none'
+      shareBtn.disabled = true
+    }
 
     try {
       const text = await window.callOracle('compatibility', tier, { name1, date1, name2, date2 })
       resultText.textContent = text
+      latestResultText = text
 
       if (tier === 'free') {
         badge.className = 'tier-badge free'
@@ -59,11 +67,18 @@
         badge.textContent = 'Полный расклад'
         paidBtn.style.display = 'none'
       }
+
+      if (shareBtn) {
+        shareBtn.style.display = 'inline-flex'
+        shareBtn.disabled = false
+      }
     } catch (_e) {
+      latestResultText = ''
       window.showError(resultText, 'Не удалось получить расклад. Попробуй еще раз.')
       if (tier === 'free') {
         paidBtn.style.display = 'none'
       }
+      if (shareBtn) shareBtn.style.display = 'none'
     } finally {
       freeBtn.disabled = false
       if (tier === 'free' && paidBtn.style.display !== 'none') paidBtn.disabled = false
@@ -106,6 +121,7 @@
             <div id="comp-result-text" class="result-block"></div>
             <div class="divider"></div>
             <button class="btn-secondary" type="button" id="comp-btn-paid" style="display:none;">Получить полный расклад</button>
+            <button class="btn-secondary" type="button" id="comp-btn-share" style="display:none;">Поделиться результатом</button>
             <small style="color: var(--text-muted); font-size: 12px;">Полный анализ с рекомендациями</small>
           </div>
         </div>
@@ -114,10 +130,22 @@
 
     const freeBtn = document.getElementById('comp-btn-free')
     const paidBtn = document.getElementById('comp-btn-paid')
+    const shareBtn = document.getElementById('comp-btn-share')
     if (freeBtn) freeBtn.addEventListener('click', () => requestCompatibility('free'))
     if (paidBtn) {
       paidBtn.addEventListener('click', () => {
         requestCompatibility('paid')
+      })
+    }
+
+    if (shareBtn) {
+      shareBtn.addEventListener('click', function () {
+        if (IS_MAX) {
+          const shareText = `${String(latestResultText || '').slice(0, 140)}...`
+          WebApp.shareMaxContent({ text: shareText, link: APP_LINK })
+        } else {
+          alert('Шеринг доступен только в приложении Max')
+        }
       })
     }
   }

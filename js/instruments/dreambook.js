@@ -1,4 +1,6 @@
 ;(function () {
+  let latestResultText = ''
+
   function loaderHtml() {
     return `<div class="loader" role="status" aria-label="Загрузка"><span></span><span></span><span></span></div>`
   }
@@ -14,6 +16,7 @@
     const counterEl = document.getElementById('dream-counter')
     const freeBtn = document.getElementById('dream-btn-free')
     const paidBtn = document.getElementById('dream-btn-paid')
+    const shareBtn = document.getElementById('dream-btn-share')
     const resultBlock = document.getElementById('dream-result-block')
     const badge = document.getElementById('dream-tier')
     const resultText = document.getElementById('dream-result-text')
@@ -35,10 +38,15 @@
     resultText.innerHTML = loaderHtml()
     freeBtn.disabled = true
     if (paidBtn) paidBtn.disabled = true
+    if (shareBtn) {
+      shareBtn.style.display = 'none'
+      shareBtn.disabled = true
+    }
 
     try {
       const text = await window.callOracle('dreambook', tier, { dream })
       resultText.textContent = text
+      latestResultText = text
 
       if (tier === 'free') {
         badge.className = 'tier-badge free'
@@ -50,9 +58,16 @@
         badge.textContent = 'Полный расклад'
         paidBtn.style.display = 'none'
       }
+
+      if (shareBtn) {
+        shareBtn.style.display = 'inline-flex'
+        shareBtn.disabled = false
+      }
     } catch (_e) {
+      latestResultText = ''
       window.showError(resultText, 'Не удалось получить расклад. Попробуй еще раз.')
       if (tier === 'free') paidBtn.style.display = 'none'
+      if (shareBtn) shareBtn.style.display = 'none'
     } finally {
       freeBtn.disabled = false
       if (tier === 'free' && paidBtn.style.display !== 'none') paidBtn.disabled = false
@@ -86,6 +101,7 @@
             <div id="dream-result-text" class="result-block"></div>
             <div class="divider"></div>
             <button class="btn-secondary" type="button" id="dream-btn-paid" style="display:none;">Получить полный расклад</button>
+            <button class="btn-secondary" type="button" id="dream-btn-share" style="display:none;">Поделиться результатом</button>
             <small style="color: var(--text-muted); font-size: 12px;">Полный анализ с рекомендациями</small>
           </div>
         </div>
@@ -96,12 +112,24 @@
     const counterEl = document.getElementById('dream-counter')
     const freeBtn = document.getElementById('dream-btn-free')
     const paidBtn = document.getElementById('dream-btn-paid')
+    const shareBtn = document.getElementById('dream-btn-share')
 
     updateCounter(inputEl, counterEl)
     inputEl.addEventListener('input', () => updateCounter(inputEl, counterEl))
 
     if (freeBtn) freeBtn.addEventListener('click', () => requestDream('free'))
     if (paidBtn) paidBtn.addEventListener('click', () => requestDream('paid'))
+
+    if (shareBtn) {
+      shareBtn.addEventListener('click', function () {
+        if (IS_MAX) {
+          const shareText = `${String(latestResultText || '').slice(0, 140)}...`
+          WebApp.shareMaxContent({ text: shareText, link: APP_LINK })
+        } else {
+          alert('Шеринг доступен только в приложении Max')
+        }
+      })
+    }
   }
 
   window.initDreambook = initDreambook

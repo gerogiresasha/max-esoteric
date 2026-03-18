@@ -25,6 +25,7 @@
   ]
 
   let selectedCard = ''
+  let latestResultText = ''
 
   function loaderHtml() {
     return `<div class="loader" role="status" aria-label="Загрузка"><span></span><span></span><span></span></div>`
@@ -52,6 +53,7 @@
     const cardEl = document.getElementById('tarot-card')
     const freeBtn = document.getElementById('tarot-btn-free')
     const paidBtn = document.getElementById('tarot-btn-paid')
+    const shareBtn = document.getElementById('tarot-btn-share')
     const resultBlock = document.getElementById('tarot-result-block')
     const badge = document.getElementById('tarot-tier')
     const resultText = document.getElementById('tarot-result-text')
@@ -70,10 +72,15 @@
     resultText.innerHTML = loaderHtml()
     freeBtn.disabled = true
     if (paidBtn) paidBtn.disabled = true
+    if (shareBtn) {
+      shareBtn.style.display = 'none'
+      shareBtn.disabled = true
+    }
 
     try {
       const text = await window.callOracle('tarot', tier, { card: selectedCard, question: question || '' })
       resultText.textContent = text
+      latestResultText = text
 
       if (tier === 'free') {
         badge.className = 'tier-badge free'
@@ -85,9 +92,16 @@
         badge.textContent = 'Полный расклад'
         paidBtn.style.display = 'none'
       }
+
+      if (shareBtn) {
+        shareBtn.style.display = 'inline-flex'
+        shareBtn.disabled = false
+      }
     } catch (_e) {
+      latestResultText = ''
       window.showError(resultText, 'Не удалось получить расклад. Попробуй еще раз.')
       if (tier === 'free') paidBtn.style.display = 'none'
+      if (shareBtn) shareBtn.style.display = 'none'
     } finally {
       freeBtn.disabled = false
       if (tier === 'free' && paidBtn.style.display !== 'none') paidBtn.disabled = false
@@ -124,6 +138,7 @@
             <div id="tarot-result-text" class="result-block"></div>
             <div class="divider"></div>
             <button class="btn-secondary" type="button" id="tarot-btn-paid" style="display:none;">Получить полный расклад</button>
+            <button class="btn-secondary" type="button" id="tarot-btn-share" style="display:none;">Поделиться результатом</button>
             <small style="color: var(--text-muted); font-size: 12px;">Полный анализ с рекомендациями</small>
           </div>
         </div>
@@ -133,6 +148,7 @@
     const freeBtn = document.getElementById('tarot-btn-free')
     const paidBtn = document.getElementById('tarot-btn-paid')
     const cardEl = document.getElementById('tarot-card')
+    const shareBtn = document.getElementById('tarot-btn-share')
 
     selectedCard = ''
     if (cardEl) {
@@ -148,6 +164,17 @@
     }
 
     if (paidBtn) paidBtn.addEventListener('click', () => requestTarot('paid'))
+
+    if (shareBtn) {
+      shareBtn.addEventListener('click', function () {
+        if (IS_MAX) {
+          const shareText = `${String(latestResultText || '').slice(0, 140)}...`
+          WebApp.shareMaxContent({ text: shareText, link: APP_LINK })
+        } else {
+          alert('Шеринг доступен только в приложении Max')
+        }
+      })
+    }
   }
 
   window.initTarot = initTarot

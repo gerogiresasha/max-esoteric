@@ -1,6 +1,48 @@
 const SCREENS = ['compatibility', 'tarot', 'numerology', 'dreambook']
 let currentScreen = 'compatibility'
 
+let currentUser = null
+
+function initMaxBridge() {
+  if (IS_MAX) {
+    try {
+      WebApp.ready()
+    } catch (_e) {
+      // ignore
+    }
+
+    const user = WebApp.initDataUnsafe?.user || null
+    currentUser = {
+      id: user?.id || '',
+      first_name: user?.first_name || '',
+      last_name: user?.last_name || '',
+      username: user?.username || '',
+    }
+
+    if (WebApp.BackButton) {
+      try {
+        WebApp.BackButton.show()
+      } catch (_e) {
+        // ignore
+      }
+
+      try {
+        WebApp.BackButton.onClick(() => {
+          showScreen('compatibility')
+        })
+      } catch (_e) {
+        // ignore
+      }
+    }
+  } else {
+    currentUser = { id: 'test_user', first_name: 'Тест', last_name: '', username: 'testuser' }
+  }
+
+  window.currentUser = currentUser
+}
+
+initMaxBridge()
+
 function showScreen(name) {
   if (!SCREENS.includes(name)) return
 
