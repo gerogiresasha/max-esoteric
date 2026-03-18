@@ -16,7 +16,6 @@
     const counterEl = document.getElementById('dream-counter')
     const freeBtn = document.getElementById('dream-btn-free')
     const paidBtn = document.getElementById('dream-btn-paid')
-    const shareBtn = document.getElementById('dream-btn-share')
     const resultBlock = document.getElementById('dream-result-block')
     const badge = document.getElementById('dream-tier')
     const resultText = document.getElementById('dream-result-text')
@@ -38,9 +37,10 @@
     resultText.innerHTML = loaderHtml()
     freeBtn.disabled = true
     if (paidBtn) paidBtn.disabled = true
-    if (shareBtn) {
-      shareBtn.style.display = 'none'
-      shareBtn.disabled = true
+    const shareBtnEl = document.getElementById('dream-btn-share')
+    if (shareBtnEl) {
+      shareBtnEl.style.display = 'none'
+      shareBtnEl.disabled = true
     }
 
     try {
@@ -59,6 +59,7 @@
         paidBtn.style.display = 'none'
       }
 
+      const shareBtn = document.getElementById('dream-btn-share')
       if (shareBtn) {
         shareBtn.style.display = 'inline-flex'
         shareBtn.disabled = false
@@ -67,6 +68,7 @@
       latestResultText = ''
       window.showError(resultText, 'Не удалось получить расклад. Попробуй еще раз.')
       if (tier === 'free') paidBtn.style.display = 'none'
+      const shareBtn = document.getElementById('dream-btn-share')
       if (shareBtn) shareBtn.style.display = 'none'
     } finally {
       freeBtn.disabled = false

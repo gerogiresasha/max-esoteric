@@ -25,7 +25,6 @@
     const resultText = document.getElementById('comp-result-text')
     const paidBtn = document.getElementById('comp-btn-paid')
     const freeBtn = document.getElementById('comp-btn-free')
-    const shareBtn = document.getElementById('comp-btn-share')
 
     const hasErrors =
       shakeIfEmpty(name1El) ||
@@ -47,9 +46,10 @@
 
     freeBtn.disabled = true
     if (paidBtn) paidBtn.disabled = true
-    if (shareBtn) {
-      shareBtn.style.display = 'none'
-      shareBtn.disabled = true
+    const shareBtnEl = document.getElementById('comp-btn-share')
+    if (shareBtnEl) {
+      shareBtnEl.style.display = 'none'
+      shareBtnEl.disabled = true
     }
 
     try {
@@ -68,6 +68,7 @@
         paidBtn.style.display = 'none'
       }
 
+      const shareBtn = document.getElementById('comp-btn-share')
       if (shareBtn) {
         shareBtn.style.display = 'inline-flex'
         shareBtn.disabled = false
@@ -78,6 +79,7 @@
       if (tier === 'free') {
         paidBtn.style.display = 'none'
       }
+      const shareBtn = document.getElementById('comp-btn-share')
       if (shareBtn) shareBtn.style.display = 'none'
     } finally {
       freeBtn.disabled = false

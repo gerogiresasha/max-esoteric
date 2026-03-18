@@ -20,7 +20,6 @@
     const dateEl = document.getElementById('num-date')
     const freeBtn = document.getElementById('num-btn-free')
     const paidBtn = document.getElementById('num-btn-paid')
-    const shareBtn = document.getElementById('num-btn-share')
     const resultBlock = document.getElementById('num-result-block')
     const badge = document.getElementById('num-tier')
     const resultText = document.getElementById('num-result-text')
@@ -38,9 +37,10 @@
     resultText.innerHTML = loaderHtml()
     freeBtn.disabled = true
     if (paidBtn) paidBtn.disabled = true
-    if (shareBtn) {
-      shareBtn.style.display = 'none'
-      shareBtn.disabled = true
+    const shareBtnEl = document.getElementById('num-btn-share')
+    if (shareBtnEl) {
+      shareBtnEl.style.display = 'none'
+      shareBtnEl.disabled = true
     }
 
     try {
@@ -59,6 +59,7 @@
         paidBtn.style.display = 'none'
       }
 
+      const shareBtn = document.getElementById('num-btn-share')
       if (shareBtn) {
         shareBtn.style.display = 'inline-flex'
         shareBtn.disabled = false
@@ -67,6 +68,7 @@
       latestResultText = ''
       window.showError(resultText, 'Не удалось получить расклад. Попробуй еще раз.')
       if (tier === 'free') paidBtn.style.display = 'none'
+      const shareBtn = document.getElementById('num-btn-share')
       if (shareBtn) shareBtn.style.display = 'none'
     } finally {
       freeBtn.disabled = false

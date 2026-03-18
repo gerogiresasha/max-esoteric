@@ -53,7 +53,6 @@
     const cardEl = document.getElementById('tarot-card')
     const freeBtn = document.getElementById('tarot-btn-free')
     const paidBtn = document.getElementById('tarot-btn-paid')
-    const shareBtn = document.getElementById('tarot-btn-share')
     const resultBlock = document.getElementById('tarot-result-block')
     const badge = document.getElementById('tarot-tier')
     const resultText = document.getElementById('tarot-result-text')
@@ -72,9 +71,10 @@
     resultText.innerHTML = loaderHtml()
     freeBtn.disabled = true
     if (paidBtn) paidBtn.disabled = true
-    if (shareBtn) {
-      shareBtn.style.display = 'none'
-      shareBtn.disabled = true
+    const shareBtnEl = document.getElementById('tarot-btn-share')
+    if (shareBtnEl) {
+      shareBtnEl.style.display = 'none'
+      shareBtnEl.disabled = true
     }
 
     try {
@@ -93,14 +93,17 @@
         paidBtn.style.display = 'none'
       }
 
+      const shareBtn = document.getElementById('tarot-btn-share')
       if (shareBtn) {
         shareBtn.style.display = 'inline-flex'
+        console.log('share button shown', shareBtn)
         shareBtn.disabled = false
       }
     } catch (_e) {
       latestResultText = ''
       window.showError(resultText, 'Не удалось получить расклад. Попробуй еще раз.')
       if (tier === 'free') paidBtn.style.display = 'none'
+      const shareBtn = document.getElementById('tarot-btn-share')
       if (shareBtn) shareBtn.style.display = 'none'
     } finally {
       freeBtn.disabled = false
