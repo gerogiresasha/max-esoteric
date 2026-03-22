@@ -68,7 +68,7 @@
     setTimeout(() => {
       const imgSrc = ARCANA_IMAGES[card]
       if (imgSrc) {
-        cardEl.innerHTML = `<img src="${imgSrc}" alt="${card}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" />`
+        cardEl.innerHTML = `<img src="${imgSrc}" alt="${card}" style="width:100%;flex:1;object-fit:cover;border-radius:10px;display:block;" /><p class="card-name">${card}</p>`
       } else {
         cardEl.innerHTML = `<div class="card-name">${card}</div>`
       }

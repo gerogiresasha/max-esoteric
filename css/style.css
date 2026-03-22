@@ -13,10 +13,6 @@
   --radius:16px;
   --radius-sm:8px;
   --bg-main-image:url("../assets/backgrounds/bg-main.webp");
-  --bg-compatibility-image:url("../assets/backgrounds/bg-compatibility.webp");
-  --bg-tarot-image:url("../assets/backgrounds/bg-tarot.webp");
-  --bg-numerology-image:url("../assets/backgrounds/bg-numerology.webp");
-  --bg-dreams-image:url("../assets/backgrounds/bg-dreams.webp");
 }
 
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -154,11 +150,6 @@ body::after{
   pointer-events:none;
   z-index:0;
 }
-
-.screen[data-tool="compatibility"]::before{background-image:var(--bg-compatibility-image);}
-.screen[data-tool="tarot"]::before{background-image:var(--bg-tarot-image);}
-.screen[data-tool="numerology"]::before{background-image:var(--bg-numerology-image);}
-.screen[data-tool="dreams"]::before{background-image:var(--bg-dreams-image);}
 
 .screen[data-tool] .screen-header,
 .screen[data-tool] .screen-content{
@@ -433,6 +424,7 @@ input[type="date"].input-field{
   border-radius:12px;
   overflow:hidden;
   display:flex;
+  flex-direction:column;
   align-items:center;
   justify-content:center;
   text-align:center;
@@ -451,12 +443,13 @@ input[type="date"].input-field{
   line-height:1;
 }
 
-.card-placeholder .card-name{
-  font-family:'Cormorant Garamond',serif;
-  font-size:18px;
-  font-weight:600;
-  color:var(--text-primary);
-  letter-spacing:0.4px;
+.card-name {
+  text-align: center;
+  color: #D4AF37;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  margin-top: 8px;
+  letter-spacing: 0.05em;
 }
 
 .shake{
