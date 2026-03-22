@@ -244,7 +244,7 @@
         if (cancelBtn) cancelBtn.disabled = true
         payBtn.textContent = 'Создаем платеж...'
 
-        const userId = window.MAX_USER_ID || 'anonymous'
+        const userId = window.currentUser?.id || 'anonymous'
         const BACKEND = 'https://functions.yandexcloud.net/d4evrag730e6sqoil00l'
 
         let paymentId
