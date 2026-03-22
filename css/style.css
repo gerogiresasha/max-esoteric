@@ -107,13 +107,12 @@ body::before{
 }
 
 body::after{
-  content:"";
+  content:'';
   position:fixed;
   inset:0;
-  pointer-events:none;
+  background:rgba(0, 0, 0, 0.45);
   z-index:0;
-  background:radial-gradient(420px 420px at 85% 12%, rgba(107,79,160,1) 0%, rgba(107,79,160,0) 70%);
-  opacity:0.15;
+  pointer-events:none;
 }
 
 #app{
@@ -164,26 +163,26 @@ body::after{
 }
 
 .screen-header{
-  padding:24px 20px 16px;
+  padding:20px 16px 16px;
+  background:transparent;
 }
 
 .screen-title{
   font-family:var(--font-ui);
-  font-weight:600;
   font-size:28px;
-  letter-spacing:0.4px;
+  font-weight:600;
   color:#FFFFFF;
   text-shadow:0 2px 12px rgba(0,0,0,0.8);
+  margin:0 0 6px;
 }
 
 .screen-subtitle{
-  margin-top:6px;
   font-family:var(--font-ui);
-  font-size:13px;
-  line-height:1.6;
-  letter-spacing:0.5px;
-  color:rgba(255,255,255,0.75);
+  font-size:14px;
+  font-weight:400;
+  color:rgba(255,255,255,0.7);
   text-shadow:0 1px 8px rgba(0,0,0,0.9);
+  margin:0;
 }
 
 .screen-content{
@@ -377,14 +376,6 @@ input[type="date"].input-field{
   height:2px;
   margin-top:12px;
   background:linear-gradient(90deg, var(--accent-gold) 0%, rgba(201,168,76,0) 100%);
-}
-
-.tool-divider{
-  width:100%;
-  height:auto;
-  opacity:0.4;
-  display:block;
-  margin:0 0 14px;
 }
 
 .section-label{
