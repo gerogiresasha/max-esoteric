@@ -154,7 +154,10 @@ body::before{
 }
 
 .screen-header{
-  background:linear-gradient(180deg, rgba(20, 8, 40, 0.95) 0%, rgba(15, 6, 30, 0.85) 100%);
+  background-image:url('../assets/backgrounds/bg-main.webp');
+  background-size:cover;
+  background-position:center top;
+  position:relative;
   padding:24px 16px 20px;
   min-height:160px;
   display:flex;
@@ -162,12 +165,26 @@ body::before{
   justify-content:flex-end;
 }
 
+.screen-header::before {
+  content:'';
+  position:absolute;
+  inset:0;
+  background:rgba(8, 3, 20, 0.72);
+  z-index:0;
+}
+
+.screen-header > * {
+  position:relative;
+  z-index:1;
+}
+
 .screen-title{
   font-family:var(--font-ui);
-  font-size:28px;
+  font-size:32px;
   font-weight:600;
   color:#FFFFFF;
-  text-shadow:0 2px 12px rgba(0,0,0,0.8);
+  letter-spacing:-0.5px;
+  text-shadow:0 0 20px rgba(212, 175, 55, 0.4);
   margin:0 0 6px;
 }
 
@@ -445,11 +462,11 @@ input[type="date"].input-field{
 }
 
 .card-placeholder-icon {
-  font-family: 'Montserrat', sans-serif;
-  font-size: 64px;
-  font-weight: 300;
+  font-family:'Cormorant Garamond', serif;
+  font-size:72px;
+  font-style:italic;
   color: #D4AF37;
-  opacity: 0.7;
+  opacity:0.8;
   line-height:1;
 }
 
