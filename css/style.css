@@ -12,6 +12,8 @@
   --shadow:rgba(0,0,0,0.6);
   --radius:16px;
   --radius-sm:8px;
+  --font-ui:'Montserrat', sans-serif;
+  --font-content:'Cormorant Garamond', serif;
   --bg-main-image:url("../assets/backgrounds/bg-main.webp");
 }
 
@@ -26,7 +28,7 @@ body{
   background-position:center;
   background-repeat:no-repeat;
   color:var(--text-primary);
-  font-family:'Raleway',sans-serif;
+  font-family:var(--font-ui);
   -webkit-font-smoothing:antialiased;
   text-rendering:optimizeLegibility;
   overflow-x:hidden;
@@ -166,18 +168,22 @@ body::after{
 }
 
 .screen-title{
-  font-family:'Cormorant Garamond',serif;
+  font-family:var(--font-ui);
   font-weight:600;
   font-size:28px;
   letter-spacing:0.4px;
+  color:#FFFFFF;
+  text-shadow:0 2px 12px rgba(0,0,0,0.8);
 }
 
 .screen-subtitle{
   margin-top:6px;
-  color:var(--text-secondary);
+  font-family:var(--font-ui);
   font-size:13px;
   line-height:1.6;
   letter-spacing:0.5px;
+  color:rgba(255,255,255,0.75);
+  text-shadow:0 1px 8px rgba(0,0,0,0.9);
 }
 
 .screen-content{
@@ -215,6 +221,7 @@ body::after{
   letter-spacing:0.7px;
   text-transform:uppercase;
   color:var(--text-muted);
+  font-family:var(--font-ui);
 }
 
 .input-field{
@@ -224,7 +231,7 @@ body::after{
   border-radius:var(--radius-sm);
   padding:14px 16px;
   color:var(--text-primary);
-  font-family:'Raleway',sans-serif;
+  font-family:var(--font-ui);
   font-size:15px;
   outline:none;
 }
@@ -249,7 +256,7 @@ input[type="date"].input-field{
   border-radius:var(--radius-sm);
   border:none;
   color:#0a0812;
-  font-family:'Raleway',sans-serif;
+  font-family:var(--font-ui);
   font-weight:600;
   font-size:15px;
   letter-spacing:0.5px;
@@ -280,7 +287,7 @@ input[type="date"].input-field{
   border-radius:var(--radius-sm);
   border:1px solid var(--accent-gold);
   color:var(--accent-gold);
-  font-family:'Raleway',sans-serif;
+  font-family:var(--font-ui);
   font-weight:600;
   font-size:15px;
   letter-spacing:0.5px;
@@ -306,12 +313,6 @@ input[type="date"].input-field{
 .btn-row .btn-primary,
 .btn-row .btn-secondary{
   flex:1 1 160px;
-}
-
-.divider{
-  height:1px;
-  background:var(--border);
-  margin:20px 0;
 }
 
 .tier-badge{
@@ -345,6 +346,7 @@ input[type="date"].input-field{
   color:var(--text-primary);
   animation:fadeInUp 0.4s ease;
   white-space:pre-wrap;
+  font-family:var(--font-content);
 }
 
 .fade-in-up{
@@ -437,16 +439,31 @@ input[type="date"].input-field{
   transform:rotateY(360deg);
 }
 
+#tarot-card.card-placeholder{
+  width:100%;
+  max-width:none;
+  height:auto;
+  overflow:visible;
+}
+
 .card-placeholder .card-symbol{
   font-size:40px;
   color:var(--accent-gold);
   line-height:1;
 }
 
+.tarot-card-img {
+  width: 220px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  filter: brightness(1.3) contrast(1.05);
+}
+
 .card-name {
   text-align: center;
   color: #D4AF37;
-  font-family: 'Cormorant Garamond', serif;
+  font-family:var(--font-ui);
   font-size: 18px;
   margin-top: 8px;
   letter-spacing: 0.05em;
@@ -550,7 +567,7 @@ textarea.input-field{
   font-size:10px;
   letter-spacing:0.5px;
   text-transform:uppercase;
-  font-family:'Raleway',sans-serif;
+  font-family:var(--font-ui);
 }
 
 .nav-item:active{

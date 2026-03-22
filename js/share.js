@@ -124,12 +124,12 @@
   function loadFonts() {
     if (!document.fonts || !document.fonts.check || !document.fonts.load) return Promise.resolve()
 
-    const checks = [
-      '600 32px "Cormorant Garamond"',
-      '400 26px "Cormorant Garamond"',
-      '600 24px Raleway',
-      '400 18px Raleway',
-    ]
+	    const checks = [
+	      '600 32px Montserrat',
+	      '400 26px Montserrat',
+	      '600 24px Montserrat',
+	      '400 18px Montserrat',
+	    ]
 
     const allReady = checks.every((f) => document.fonts.check(f))
     if (allReady) return Promise.resolve()
@@ -184,13 +184,13 @@
     ctx.font = '56px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",system-ui,sans-serif'
     ctx.fillText(cfg.emoji, 540, 64)
 
-    ctx.fillStyle = '#f0e6d3'
-    ctx.font = '600 32px "Cormorant Garamond", serif'
-    ctx.fillText(cfg.title, 540, 64 + 56 + 16)
+	    ctx.fillStyle = '#f0e6d3'
+	    ctx.font = '600 32px Montserrat, sans-serif'
+	    ctx.fillText(cfg.title, 540, 64 + 56 + 16)
 
-    ctx.fillStyle = '#9b8aa0'
-    ctx.font = '400 20px Raleway, sans-serif'
-    ctx.fillText(cfg.subtitle, 540, 64 + 56 + 16 + 32 + 8)
+	    ctx.fillStyle = '#9b8aa0'
+	    ctx.font = '400 20px Montserrat, sans-serif'
+	    ctx.fillText(cfg.subtitle, 540, 64 + 56 + 16 + 32 + 8)
 
     // 5) Divider
     ctx.save()
@@ -206,10 +206,10 @@
     // 6) Main text
     const textClamped = clampText(text, 500)
     ctx.textAlign = 'left'
-    ctx.textBaseline = 'top'
-    ctx.fillStyle = '#e8ddd0'
-    ctx.font = 'italic 400 26px "Cormorant Garamond", serif'
-    wrapText(ctx, textClamped, 64, 310, 952, 42, 12)
+	    ctx.textBaseline = 'top'
+	    ctx.fillStyle = '#e8ddd0'
+	    ctx.font = 'italic 400 26px Montserrat, sans-serif'
+	    wrapText(ctx, textClamped, 64, 310, 952, 42, 12)
 
     // 7) Bottom divider
     ctx.save()
@@ -226,13 +226,13 @@
     ctx.textAlign = 'center'
     ctx.textBaseline = 'top'
 
-    ctx.fillStyle = '#c9a84c'
-    ctx.font = '600 24px Raleway, sans-serif'
-    ctx.fillText('✦ Гадалка в Max', 540, 880)
+	    ctx.fillStyle = '#c9a84c'
+	    ctx.font = '600 24px Montserrat, sans-serif'
+	    ctx.fillText('✦ Гадалка в Max', 540, 880)
 
-    ctx.fillStyle = '#9b8aa0'
-    ctx.font = '400 18px Raleway, sans-serif'
-    ctx.fillText(typeof APP_LINK === 'string' ? APP_LINK : '', 540, 880 + 24 + 12)
+	    ctx.fillStyle = '#9b8aa0'
+	    ctx.font = '400 18px Montserrat, sans-serif'
+	    ctx.fillText(typeof APP_LINK === 'string' ? APP_LINK : '', 540, 880 + 24 + 12)
 
     const dataUrl = canvas.toDataURL('image/png')
     return { canvas, dataUrl }

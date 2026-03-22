@@ -101,14 +101,13 @@
 
         <div id="num-result-block" class="card" style="display:none;">
           <div class="stack">
-            <div id="num-tier" class="tier-badge free">Краткий расклад</div>
-            <div id="num-result-text" class="result-block"></div>
-            <div class="divider"></div>
-            <button class="btn-secondary" type="button" id="num-btn-paid" style="display:none;">Получить полный расклад</button>
-            <button class="btn-secondary" type="button" id="num-btn-share" style="display:none;">Поделиться результатом</button>
-            <small style="color: var(--text-muted); font-size: 12px;">Полный анализ с рекомендациями</small>
-          </div>
-        </div>
+	            <div id="num-tier" class="tier-badge free">Краткий расклад</div>
+	            <div id="num-result-text" class="result-block"></div>
+	            <button class="btn-secondary" type="button" id="num-btn-paid" style="display:none;">Получить полный расклад</button>
+	            <button class="btn-secondary" type="button" id="num-btn-share" style="display:none;">Поделиться результатом</button>
+	            <small style="color: var(--text-muted); font-size: 12px;">Полный анализ с рекомендациями</small>
+	          </div>
+	        </div>
       </div>
     `
 

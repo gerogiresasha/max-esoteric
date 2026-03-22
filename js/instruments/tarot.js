@@ -68,7 +68,7 @@
     setTimeout(() => {
       const imgSrc = ARCANA_IMAGES[card]
       if (imgSrc) {
-        cardEl.innerHTML = `<img src="${imgSrc}" alt="${card}" style="width:100%;flex:1;object-fit:cover;border-radius:10px;display:block;" /><p class="card-name">${card}</p>`
+        cardEl.innerHTML = `<img class="tarot-card-img" src="${imgSrc}" alt="${card}" /><p class="card-name">${card}</p>`
       } else {
         cardEl.innerHTML = `<div class="card-name">${card}</div>`
       }
@@ -168,14 +168,13 @@
 
         <div id="tarot-result-block" class="card" style="display:none;">
           <div class="stack">
-            <div id="tarot-tier" class="tier-badge free">Краткий расклад</div>
-            <div id="tarot-result-text" class="result-block"></div>
-            <div class="divider"></div>
-            <button class="btn-secondary" type="button" id="tarot-btn-paid" style="display:none;">Получить полный расклад</button>
-            <button class="btn-secondary" type="button" id="tarot-btn-share" style="display:none;">Поделиться результатом</button>
-            <small style="color: var(--text-muted); font-size: 12px;">Полный анализ с рекомендациями</small>
-          </div>
-        </div>
+	            <div id="tarot-tier" class="tier-badge free">Краткий расклад</div>
+	            <div id="tarot-result-text" class="result-block"></div>
+	            <button class="btn-secondary" type="button" id="tarot-btn-paid" style="display:none;">Получить полный расклад</button>
+	            <button class="btn-secondary" type="button" id="tarot-btn-share" style="display:none;">Поделиться результатом</button>
+	            <small style="color: var(--text-muted); font-size: 12px;">Полный анализ с рекомендациями</small>
+	          </div>
+	        </div>
       </div>
     `
 

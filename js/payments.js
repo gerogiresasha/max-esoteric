@@ -98,20 +98,20 @@
         gap: 10px;
         margin-top: 10px;
       }
-      .sbp-card .btn-ghost{
-        width:100%;
-        padding:16px;
-        background:transparent;
-        border-radius:var(--radius-sm, 8px);
-        border:1px solid var(--border, rgba(201,168,76,0.2));
-        color:var(--text-primary, rgba(255,255,255,0.92));
-        font-family:'Raleway',sans-serif;
-        font-weight:600;
-        font-size:15px;
-        letter-spacing:0.5px;
-        cursor:pointer;
-        transition:all 0.2s ease;
-      }
+	      .sbp-card .btn-ghost{
+	        width:100%;
+	        padding:16px;
+	        background:transparent;
+	        border-radius:var(--radius-sm, 8px);
+	        border:1px solid var(--border, rgba(201,168,76,0.2));
+	        color:var(--text-primary, rgba(255,255,255,0.92));
+	        font-family:var(--font-ui, 'Montserrat', sans-serif);
+	        font-weight:600;
+	        font-size:15px;
+	        letter-spacing:0.5px;
+	        cursor:pointer;
+	        transition:all 0.2s ease;
+	      }
       .sbp-card .btn-ghost:hover{
         background:rgba(255,255,255,0.04);
         transform:translateY(-1px);

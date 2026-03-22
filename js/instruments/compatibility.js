@@ -120,14 +120,13 @@
 
         <div id="comp-result-block" class="card" style="display:none;">
           <div class="stack">
-            <div id="comp-tier" class="tier-badge free">Краткий расклад</div>
-            <div id="comp-result-text" class="result-block"></div>
-            <div class="divider"></div>
-            <button class="btn-secondary" type="button" id="comp-btn-paid" style="display:none;">Получить полный расклад</button>
-            <button class="btn-secondary" type="button" id="comp-btn-share" style="display:none;">Поделиться результатом</button>
-            <small style="color: var(--text-muted); font-size: 12px;">Полный анализ с рекомендациями</small>
-          </div>
-        </div>
+	            <div id="comp-tier" class="tier-badge free">Краткий расклад</div>
+	            <div id="comp-result-text" class="result-block"></div>
+	            <button class="btn-secondary" type="button" id="comp-btn-paid" style="display:none;">Получить полный расклад</button>
+	            <button class="btn-secondary" type="button" id="comp-btn-share" style="display:none;">Поделиться результатом</button>
+	            <small style="color: var(--text-muted); font-size: 12px;">Полный анализ с рекомендациями</small>
+	          </div>
+	        </div>
       </div>
     `
 
