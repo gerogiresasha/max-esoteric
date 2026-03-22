@@ -15,6 +15,38 @@
     return true
   }
 
+  function isValidDate(dateStr) {
+    const date = new Date(dateStr)
+    if (isNaN(date.getTime())) return false
+    const year = date.getFullYear()
+    if (year < 1900 || year > new Date().getFullYear()) return false
+    return date <= new Date()
+  }
+
+  function clearFieldError(input) {
+    if (!input) return
+    const next = input.nextElementSibling
+    if (next && next.classList && next.classList.contains('field-error')) next.remove()
+  }
+
+  function showFieldError(input, message) {
+    if (!input) return
+    clearFieldError(input)
+    const p = document.createElement('p')
+    p.className = 'field-error'
+    p.textContent = message
+    input.insertAdjacentElement('afterend', p)
+  }
+
+  function setDateConstraints(dateInput) {
+    if (!dateInput) return
+    const today = new Date()
+    const minDate = '1900-01-01'
+    const maxDate = today.toISOString().split('T')[0]
+    dateInput.setAttribute('min', minDate)
+    dateInput.setAttribute('max', maxDate)
+  }
+
   async function requestCompatibility(tier) {
     const name1El = document.getElementById('comp-name1')
     const date1El = document.getElementById('comp-date1')
@@ -32,6 +64,17 @@
       shakeIfEmpty(name2El) ||
       shakeIfEmpty(date2El)
     if (hasErrors) return
+
+    clearFieldError(date1El)
+    clearFieldError(date2El)
+    if (!isValidDate(date1El.value)) {
+      showFieldError(date1El, 'Введи корректную дату')
+      return
+    }
+    if (!isValidDate(date2El.value)) {
+      showFieldError(date2El, 'Введи корректную дату')
+      return
+    }
 
     const name1 = name1El.value.trim()
     const date1 = date1El.value
@@ -99,16 +142,16 @@
       </div>
       <div class="screen-content">
         <div class="card">
-          <div class="stack">
-            <div class="section-label">Первый человек</div>
-            <input class="input-field" type="text" placeholder="Имя" id="comp-name1" autocomplete="name" />
-            <input class="input-field" type="date" id="comp-date1" />
-
-            <div class="infinity-divider" aria-hidden="true">♾</div>
-
-            <div class="section-label">Второй человек</div>
-            <input class="input-field" type="text" placeholder="Имя" id="comp-name2" autocomplete="name" />
-            <input class="input-field" type="date" id="comp-date2" />
+	          <div class="stack">
+	            <div class="section-label">Первый человек</div>
+	            <input class="input-field" type="text" placeholder="Имя" id="comp-name1" autocomplete="name" />
+	            <input class="input-field" type="date" id="comp-date1" min="1900-01-01" />
+	
+	            <div class="infinity-divider" aria-hidden="true">♾</div>
+	
+	            <div class="section-label">Второй человек</div>
+	            <input class="input-field" type="text" placeholder="Имя" id="comp-name2" autocomplete="name" />
+	            <input class="input-field" type="date" id="comp-date2" min="1900-01-01" />
 
             <div class="spacer-20" aria-hidden="true"></div>
             <button class="btn-primary" type="button" id="comp-btn-free">Узнать совместимость</button>
@@ -129,13 +172,26 @@
       </div>
     `
 
-    const freeBtn = document.getElementById('comp-btn-free')
-    const paidBtn = document.getElementById('comp-btn-paid')
-    const shareBtn = document.getElementById('comp-btn-share')
-    if (freeBtn) freeBtn.addEventListener('click', () => requestCompatibility('free'))
-    if (paidBtn) {
-      paidBtn.addEventListener('click', () => {
-        window.showPaymentModal('compatibility', () => requestCompatibility('paid'))
+	    const freeBtn = document.getElementById('comp-btn-free')
+	    const paidBtn = document.getElementById('comp-btn-paid')
+	    const shareBtn = document.getElementById('comp-btn-share')
+	    const date1El = document.getElementById('comp-date1')
+	    const date2El = document.getElementById('comp-date2')
+
+	    setDateConstraints(date1El)
+	    setDateConstraints(date2El)
+	    if (date1El) {
+	      date1El.addEventListener('input', () => clearFieldError(date1El))
+	      date1El.addEventListener('change', () => clearFieldError(date1El))
+	    }
+	    if (date2El) {
+	      date2El.addEventListener('input', () => clearFieldError(date2El))
+	      date2El.addEventListener('change', () => clearFieldError(date2El))
+	    }
+	    if (freeBtn) freeBtn.addEventListener('click', () => requestCompatibility('free'))
+	    if (paidBtn) {
+	      paidBtn.addEventListener('click', () => {
+	        window.showPaymentModal('compatibility', () => requestCompatibility('paid'))
       })
     }
 
