@@ -12,6 +12,11 @@
   --shadow:rgba(0,0,0,0.6);
   --radius:16px;
   --radius-sm:8px;
+  --bg-main-image:url("../assets/backgrounds/bg-main.webp");
+  --bg-compatibility-image:url("../assets/backgrounds/bg-compatibility.webp");
+  --bg-tarot-image:url("../assets/backgrounds/bg-tarot.webp");
+  --bg-numerology-image:url("../assets/backgrounds/bg-numerology.webp");
+  --bg-dreams-image:url("../assets/backgrounds/bg-dreams.webp");
 }
 
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -19,7 +24,11 @@
 html,body{height:100%;}
 
 body{
-  background:var(--bg);
+  background-color:var(--bg);
+  background-image:var(--bg-main-image);
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
   color:var(--text-primary);
   font-family:'Raleway',sans-serif;
   -webkit-font-smoothing:antialiased;
@@ -133,6 +142,28 @@ body::after{
   display:none;
   flex-direction:column;
   animation:fadeIn 0.3s ease;
+}
+
+.screen[data-tool]::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  pointer-events:none;
+  z-index:0;
+}
+
+.screen[data-tool="compatibility"]::before{background-image:var(--bg-compatibility-image);}
+.screen[data-tool="tarot"]::before{background-image:var(--bg-tarot-image);}
+.screen[data-tool="numerology"]::before{background-image:var(--bg-numerology-image);}
+.screen[data-tool="dreams"]::before{background-image:var(--bg-dreams-image);}
+
+.screen[data-tool] .screen-header,
+.screen[data-tool] .screen-content{
+  position:relative;
+  z-index:1;
 }
 
 .screen.active{
@@ -355,6 +386,14 @@ input[type="date"].input-field{
   background:linear-gradient(90deg, var(--accent-gold) 0%, rgba(201,168,76,0) 100%);
 }
 
+.tool-divider{
+  width:100%;
+  height:auto;
+  opacity:0.4;
+  display:block;
+  margin:0 0 14px;
+}
+
 .section-label{
   font-size:11px;
   letter-spacing:1px;
@@ -502,6 +541,16 @@ textarea.input-field{
 .nav-item svg{
   width:24px;
   height:24px;
+}
+
+.nav-item .nav-icon{
+  width:24px;
+  height:24px;
+  opacity:0.5;
+}
+
+.nav-item.active .nav-icon{
+  opacity:1;
 }
 
 .nav-item span{

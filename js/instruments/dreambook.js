@@ -87,6 +87,7 @@
         <div class="screen-accent" aria-hidden="true"></div>
       </div>
       <div class="screen-content">
+        <img class="tool-divider" src="assets/dividers/divider-gold.webp" alt="" aria-hidden="true" />
         <div class="card">
           <div class="stack">
             <textarea id="dream-input" class="input-field" placeholder="Опиши свой сон..." maxlength="1000"></textarea>

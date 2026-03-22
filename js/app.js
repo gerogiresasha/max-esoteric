@@ -62,40 +62,15 @@ function showScreen(name) {
   currentScreen = name
 }
 
-function iconSvg(name) {
-  if (name === 'compatibility') {
-    return `
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <circle cx="10" cy="12" r="6.5" stroke="currentColor" stroke-width="1.6"></circle>
-        <circle cx="14" cy="12" r="6.5" stroke="currentColor" stroke-width="1.6"></circle>
-      </svg>
-    `
+function iconImg(name) {
+  const icons = {
+    compatibility: 'assets/icons/icon-compatibility.webp',
+    tarot: 'assets/icons/icon-tarot.webp',
+    numerology: 'assets/icons/icon-numerology.webp',
+    dreambook: 'assets/icons/icon-dreams.webp',
   }
-
-  if (name === 'tarot') {
-    return `
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <rect x="6.2" y="4.8" width="11.6" height="14.4" rx="2.2" stroke="currentColor" stroke-width="1.6"></rect>
-        <path d="M12 8.1l.9 1.9 2 .3-1.5 1.4.4 2-1.8-1-1.8 1 .4-2-1.5-1.4 2-.3.9-1.9z" fill="currentColor"></path>
-      </svg>
-    `
-  }
-
-  if (name === 'numerology') {
-    return `
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M7 18V6l10 12V6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
-        <circle cx="18.2" cy="16.6" r="2" stroke="currentColor" stroke-width="1.6"></circle>
-      </svg>
-    `
-  }
-
-  return `
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M15.7 14.3a6.6 6.6 0 0 1-8.5-7.9 7.1 7.1 0 1 0 8.5 7.9z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
-      <path d="M7.1 15.6c.9-1.4 2.4-2.2 4.2-2.2 1.8 0 3.3.8 4.2 2.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path>
-    </svg>
-  `
+  const src = icons[name]
+  return src ? `<img class="nav-icon" src="${src}" width="24" height="24" alt="" aria-hidden="true" />` : ''
 }
 
 function titleFor(name) {
@@ -122,6 +97,7 @@ function renderApp() {
     const screen = document.createElement('div')
     screen.className = 'screen'
     screen.id = `screen-${name}`
+    screen.dataset.tool = name === 'dreambook' ? 'dreams' : name
     screensRoot.appendChild(screen)
   })
 
@@ -136,7 +112,7 @@ function renderApp() {
     item.className = 'nav-item'
     item.dataset.screen = name
     item.setAttribute('aria-label', titleFor(name))
-    item.innerHTML = `${iconSvg(name)}<span>${titleFor(name)}</span>`
+    item.innerHTML = `${iconImg(name)}<span>${titleFor(name)}</span>`
     item.addEventListener('click', () => showScreen(name))
     nav.appendChild(item)
   })
