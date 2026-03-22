@@ -6,6 +6,35 @@
     dreambook: { amount: 99, label: 'Развернутый анализ сна' },
   }
 
+  const DEFAULT_FEATURES = [
+    '✓ Полный развернутый текст 400-600 слов',
+    '✓ Персональный анализ под твои данные',
+    '✓ Практические рекомендации',
+  ]
+
+  const FEATURES = {
+    compatibility: [
+      '✓ Где между вами настоящее напряжение',
+      '✓ Паттерн который повторяется — и откуда он',
+      '✓ Что сказать и сделать чтобы стало лучше',
+    ],
+    tarot: [
+      '✓ Что карта говорит именно про твой сегодняшний день',
+      '✓ На что обратить внимание — и чего избежать',
+      '✓ Одно конкретное действие на сегодня',
+    ],
+    numerology: [
+      '✓ Какой отпечаток твое имя оставляет на характере',
+      '✓ Скрытый талант и главная ловушка твоего числа',
+      '✓ Как использовать это осознанно',
+    ],
+    dreambook: [
+      '✓ Что твоя психика пытается тебе сказать',
+      '✓ Связь сна с тем что происходит в жизни прямо сейчас',
+      '✓ На что обратить внимание в ближайшие дни',
+    ],
+  }
+
   const STYLE_ID = 'sbp-modal-styles'
   const MODAL_ID = 'sbp-payment-modal'
 
@@ -154,6 +183,8 @@
       return
     }
 
+    const features = FEATURES[instrument] || DEFAULT_FEATURES
+
     const prev = document.getElementById(MODAL_ID)
     if (prev) prev.remove()
 
@@ -169,23 +200,29 @@
     overlay.innerHTML = `
       <div class="sbp-card" role="document">
         <div class="sbp-icon" aria-hidden="true">✦</div>
-        <div class="sbp-title" id="${titleId}">${price.label}</div>
-        <p class="sbp-price">${rub(price.amount)}</p>
-        <div class="sbp-sub">разовый платеж</div>
-        <ul class="sbp-features">
-          <li>✓ Полный развернутый текст 400-600 слов</li>
-          <li>✓ Персональный анализ под твои данные</li>
-          <li>✓ Практические рекомендации</li>
-        </ul>
-        <div class="sbp-actions">
-          <button type="button" class="btn-primary" data-sbp-pay>Оплатить ${rub(price.amount)}</button>
-          <button type="button" class="btn-ghost" data-sbp-cancel>Отмена</button>
-        </div>
-        <div class="sbp-disclaimer">Безопасная оплата через Систему быстрых платежей</div>
-      </div>
-    `
+	        <div class="sbp-title" id="${titleId}">${price.label}</div>
+	        <p class="sbp-price">${rub(price.amount)}</p>
+	        <div class="sbp-sub">разовый платеж</div>
+	        <ul class="sbp-features"></ul>
+	        <div class="sbp-actions">
+	          <button type="button" class="btn-primary" data-sbp-pay>Оплатить ${rub(price.amount)}</button>
+	          <button type="button" class="btn-ghost" data-sbp-cancel>Отмена</button>
+	        </div>
+	        <div class="sbp-disclaimer">Безопасная оплата через Систему быстрых платежей</div>
+	      </div>
+	    `
 
-    document.body.appendChild(overlay)
+	    const featuresList = overlay.querySelector('.sbp-features')
+	    if (featuresList) {
+	      featuresList.innerHTML = ''
+	      features.forEach((line) => {
+	        const li = document.createElement('li')
+	        li.textContent = line
+	        featuresList.appendChild(li)
+	      })
+	    }
+
+	    document.body.appendChild(overlay)
 
     const payBtn = overlay.querySelector('[data-sbp-pay]')
     const cancelBtn = overlay.querySelector('[data-sbp-cancel]')
