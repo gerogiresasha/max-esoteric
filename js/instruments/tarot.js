@@ -24,6 +24,31 @@
     'Мир',
   ]
 
+  const ARCANA_IMAGES = {
+    'Шут': 'assets/tarot/шут.jpg',
+    'Маг': 'assets/tarot/маг.jpg',
+    'Жрица': 'assets/tarot/жрица.jpg',
+    'Императрица': 'assets/tarot/императрица.jpg',
+    'Император': 'assets/tarot/император.jpg',
+    'Иерофант': 'assets/tarot/иерофант.jpg',
+    'Влюбленные': 'assets/tarot/влюбленные.jpg',
+    'Колесница': 'assets/tarot/колесница.jpg',
+    'Сила': 'assets/tarot/сила.jpg',
+    'Отшельник': 'assets/tarot/отшельник.jpg',
+    'Колесо Фортуны': 'assets/tarot/колесо фортуны.jpg',
+    'Справедливость': 'assets/tarot/справедливость.jpg',
+    'Повешенный': 'assets/tarot/повешенный.jpg',
+    'Смерть': 'assets/tarot/смерть.jpg',
+    'Умеренность': 'assets/tarot/умеренность.jpg',
+    'Дьявол': 'assets/tarot/дьявол.jpg',
+    'Башня': 'assets/tarot/башня.jpg',
+    'Звезда': 'assets/tarot/звезда.jpg',
+    'Луна': 'assets/tarot/луна.jpg',
+    'Солнце': 'assets/tarot/солнце.jpg',
+    'Суд': 'assets/tarot/суд.jpg',
+    'Мир': 'assets/tarot/мир.jpg',
+  }
+
   let selectedCard = ''
   let latestResultText = ''
 
@@ -41,7 +66,12 @@
     void cardEl.offsetWidth
     cardEl.classList.add('flip')
     setTimeout(() => {
-      cardEl.innerHTML = `<div class="card-name">${card}</div>`
+      const imgSrc = ARCANA_IMAGES[card]
+      if (imgSrc) {
+        cardEl.innerHTML = `<img src="${imgSrc}" alt="${card}" style="width:100%;height:100%;object-fit:cover;border-radius:10px;" />`
+      } else {
+        cardEl.innerHTML = `<div class="card-name">${card}</div>`
+      }
     }, 320)
     setTimeout(() => {
       cardEl.classList.remove('flip')
@@ -166,16 +196,11 @@
       })
     }
 
-    if (paidBtn) paidBtn.addEventListener('click', () => requestTarot('paid'))
+    if (paidBtn) paidBtn.addEventListener('click', () => window.showPaymentModal('tarot', () => requestTarot('paid')))
 
     if (shareBtn) {
       shareBtn.addEventListener('click', function () {
-        const shareText = `${String(latestResultText || '').slice(0, 140)}...`
-        if (IS_MAX) {
-          WebApp.shareMaxContent({ text: shareText, link: APP_LINK })
-        } else {
-          alert('Шеринг доступен только в приложении Max')
-        }
+        window.shareResult('tarot', latestResultText)
       })
     }
   }

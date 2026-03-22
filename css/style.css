@@ -392,6 +392,7 @@ input[type="date"].input-field{
   background:linear-gradient(135deg, var(--bg-input), var(--accent-purple) 150%);
   border:2px solid var(--border);
   border-radius:12px;
+  overflow:hidden;
   display:flex;
   align-items:center;
   justify-content:center;

@@ -116,16 +116,11 @@
     const shareBtn = document.getElementById('num-btn-share')
 
     if (freeBtn) freeBtn.addEventListener('click', () => requestNumerology('free'))
-    if (paidBtn) paidBtn.addEventListener('click', () => requestNumerology('paid'))
+    if (paidBtn) paidBtn.addEventListener('click', () => window.showPaymentModal('numerology', () => requestNumerology('paid')))
 
     if (shareBtn) {
       shareBtn.addEventListener('click', function () {
-        const shareText = `${String(latestResultText || '').slice(0, 140)}...`
-        if (IS_MAX) {
-          WebApp.shareMaxContent({ text: shareText, link: APP_LINK })
-        } else {
-          alert('Шеринг доступен только в приложении Max')
-        }
+        window.shareResult('numerology', latestResultText)
       })
     }
   }

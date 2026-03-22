@@ -1,7 +1,17 @@
 const prompts = require("./prompts");
+const crypto = require("crypto");
 
 const YC_COMPLETION_URL =
   "https://llm.api.cloud.yandex.net/v1/chat/completions";
+
+const YUKASSA_API_URL = "https://api.yookassa.ru/v3/payments";
+const INSTRUMENT_PRICES = {
+  compatibility: 14900,
+  tarot: 9900,
+  numerology: 9900,
+  dreambook: 9900,
+};
+const payments = new Map(); // хранилище статусов в памяти
 
 function corsHeaders() {
   return {
@@ -178,6 +188,162 @@ async function callDeepSeekViaYandexAIStudio({ apiKey, modelUri, messages, tier 
   }
 }
 
+function normalizePaymentStatus(yookassaStatus) {
+  const s = asString(yookassaStatus).trim().toLowerCase();
+  if (s === "succeeded") return "succeeded";
+  if (s === "canceled") return "canceled";
+  return "pending";
+}
+
+async function handleCreatePayment(body) {
+  const instrument = asString(body?.instrument).trim();
+  const userId = asString(body?.userId).trim();
+
+  if (!instrument || !Object.prototype.hasOwnProperty.call(INSTRUMENT_PRICES, instrument)) {
+    return jsonResponse(400, {
+      success: false,
+      error: "Некорректный instrument",
+    });
+  }
+  if (!userId) {
+    return jsonResponse(400, { success: false, error: "Не задан userId" });
+  }
+
+  const shopId = process.env.YUKASSA_SHOP_ID;
+  const secretKey = process.env.YUKASSA_SECRET_KEY;
+  if (!shopId || !secretKey) {
+    return jsonResponse(500, {
+      success: false,
+      error: "Не заданы YUKASSA_SHOP_ID / YUKASSA_SECRET_KEY в env",
+    });
+  }
+
+  const idempotenceKey = crypto.randomUUID();
+  const price = INSTRUMENT_PRICES[instrument];
+  const amountValue = (Number(price) / 100).toFixed(2);
+
+  const auth = Buffer.from(`${shopId}:${secretKey}`).toString("base64");
+  const resp = await fetch(YUKASSA_API_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${auth}`,
+      "Content-Type": "application/json",
+      "Idempotency-Key": idempotenceKey,
+    },
+    body: JSON.stringify({
+      amount: { value: amountValue, currency: "RUB" },
+      payment_method_data: { type: "sbp" },
+      confirmation: {
+        type: "redirect",
+        return_url: "https://gerogiresasha.github.io/max-esoteric/",
+      },
+      capture: true,
+      description: `Расклад: ${instrument}`,
+      idempotence_key: idempotenceKey,
+    }),
+  });
+
+  const text = await resp.text();
+  let json;
+  try {
+    json = text ? JSON.parse(text) : null;
+  } catch {
+    json = null;
+  }
+
+  if (!resp.ok) {
+    const errMsg =
+      json?.description ||
+      json?.message ||
+      (text && text.length < 2000 ? text : "") ||
+      `YooKassa HTTP ${resp.status}`;
+    return jsonResponse(502, { success: false, error: errMsg });
+  }
+
+  const paymentId = asString(json?.id).trim();
+  const confirmationUrl = asString(json?.confirmation?.confirmation_url).trim();
+  if (!paymentId || !confirmationUrl) {
+    return jsonResponse(502, {
+      success: false,
+      error: "Некорректный ответ от ЮKassa (нет id/confirmation_url)",
+    });
+  }
+
+  payments.set(paymentId, { status: "pending", instrument, userId });
+  return jsonResponse(200, { success: true, paymentId, confirmationUrl });
+}
+
+async function handlePaymentStatus(body) {
+  const paymentId = asString(body?.paymentId).trim();
+  if (!paymentId) {
+    return jsonResponse(400, { success: false, error: "Не задан paymentId" });
+  }
+
+  const cached = payments.get(paymentId);
+  if (cached?.status && cached.status !== "pending") {
+    return jsonResponse(200, {
+      success: true,
+      status: normalizePaymentStatus(cached.status),
+    });
+  }
+
+  const shopId = process.env.YUKASSA_SHOP_ID;
+  const secretKey = process.env.YUKASSA_SECRET_KEY;
+  if (!shopId || !secretKey) {
+    return jsonResponse(500, {
+      success: false,
+      error: "Не заданы YUKASSA_SHOP_ID / YUKASSA_SECRET_KEY в env",
+    });
+  }
+
+  const auth = Buffer.from(`${shopId}:${secretKey}`).toString("base64");
+  const resp = await fetch(`${YUKASSA_API_URL}/${encodeURIComponent(paymentId)}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Basic ${auth}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  const text = await resp.text();
+  let json;
+  try {
+    json = text ? JSON.parse(text) : null;
+  } catch {
+    json = null;
+  }
+
+  if (!resp.ok) {
+    const errMsg =
+      json?.description ||
+      json?.message ||
+      (text && text.length < 2000 ? text : "") ||
+      `YooKassa HTTP ${resp.status}`;
+    return jsonResponse(502, { success: false, error: errMsg });
+  }
+
+  const status = normalizePaymentStatus(json?.status);
+  payments.set(paymentId, {
+    ...(cached && typeof cached === "object" ? cached : {}),
+    status,
+  });
+  return jsonResponse(200, { success: true, status });
+}
+
+async function handleWebhook(body) {
+  const paymentId = asString(body?.object?.id).trim();
+  const status = normalizePaymentStatus(body?.object?.status);
+  if (!paymentId) {
+    return jsonResponse(400, { success: false, error: "Некорректный webhook" });
+  }
+
+  payments.set(paymentId, {
+    ...(payments.get(paymentId) || {}),
+    status,
+  });
+  return jsonResponse(200, { success: true });
+}
+
 exports.handler = async function handler(event) {
   try {
     const method = (event?.httpMethod || event?.requestContext?.http?.method || "")
@@ -202,6 +368,17 @@ exports.handler = async function handler(event) {
       body = raw ? JSON.parse(raw) : {};
     } catch {
       return jsonResponse(400, { success: false, error: "Некорректный JSON" });
+    }
+
+    const action = asString(body?.action).trim();
+    if (action === "create-payment") {
+      return await handleCreatePayment(body);
+    }
+    if (action === "payment-status") {
+      return await handlePaymentStatus(body);
+    }
+    if (action === "webhook") {
+      return await handleWebhook(body);
     }
 
     const instrument = asString(body?.instrument).trim();

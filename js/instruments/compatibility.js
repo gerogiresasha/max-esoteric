@@ -136,18 +136,13 @@
     if (freeBtn) freeBtn.addEventListener('click', () => requestCompatibility('free'))
     if (paidBtn) {
       paidBtn.addEventListener('click', () => {
-        requestCompatibility('paid')
+        window.showPaymentModal('compatibility', () => requestCompatibility('paid'))
       })
     }
 
     if (shareBtn) {
       shareBtn.addEventListener('click', function () {
-        const shareText = `${String(latestResultText || '').slice(0, 140)}...`
-        if (IS_MAX) {
-          WebApp.shareMaxContent({ text: shareText, link: APP_LINK })
-        } else {
-          alert('Шеринг доступен только в приложении Max')
-        }
+        window.shareResult('compatibility', latestResultText)
       })
     }
   }
