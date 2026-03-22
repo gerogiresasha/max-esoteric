@@ -66,12 +66,14 @@
     void cardEl.offsetWidth
     cardEl.classList.add('flip')
     setTimeout(() => {
-      const imgSrc = ARCANA_IMAGES[card]
-      if (imgSrc) {
-        cardEl.innerHTML = `<img class="tarot-card-img" src="${imgSrc}" alt="${card}" /><p class="card-name">${card}</p>`
-      } else {
-        cardEl.innerHTML = `<div class="card-name">${card}</div>`
-      }
+	      const imgSrc = ARCANA_IMAGES[card]
+	      if (imgSrc) {
+	        cardEl.classList.add('has-card')
+	        cardEl.innerHTML = `<img class="tarot-card-img" src="${imgSrc}" alt="${card}" /><p class="card-name">${card}</p>`
+	      } else {
+	        cardEl.classList.remove('has-card')
+	        cardEl.innerHTML = `<div class="card-name">${card}</div>`
+	      }
     }, 320)
     setTimeout(() => {
       cardEl.classList.remove('flip')
@@ -154,9 +156,9 @@
       <div class="screen-content">
         <div class="card">
           <div class="stack">
-            <div id="tarot-card" class="card-placeholder" aria-label="Карта">
-              <span class="card-symbol" aria-hidden="true">✦</span>
-            </div>
+	            <div id="tarot-card" class="card-placeholder" aria-label="Карта">
+	              <span class="card-placeholder-icon" aria-hidden="true">?</span>
+	            </div>
             <input class="input-field" type="text" placeholder="Вопрос дня (необязательно)" id="tarot-question" />
             <div class="spacer-20" aria-hidden="true"></div>
             <button class="btn-primary" type="button" id="tarot-btn-free">Открыть карту</button>
@@ -182,10 +184,11 @@
     const cardEl = document.getElementById('tarot-card')
     const shareBtn = document.getElementById('tarot-btn-share')
 
-    selectedCard = ''
-    if (cardEl) {
-      cardEl.innerHTML = `<span class="card-symbol" aria-hidden="true">✦</span>`
-    }
+	    selectedCard = ''
+	    if (cardEl) {
+	      cardEl.classList.remove('has-card')
+	      cardEl.innerHTML = `<span class="card-placeholder-icon" aria-hidden="true">?</span>`
+	    }
 
     if (freeBtn) {
       freeBtn.addEventListener('click', () => {
