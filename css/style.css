@@ -154,9 +154,7 @@ body::before{
 }
 
 .screen-header{
-  background-image:url('../assets/backgrounds/bg-main.webp');
-  background-size:cover;
-  background-position:center top;
+  background:var(--bg);
   position:relative;
   padding:24px 16px 20px;
   min-height:160px;
@@ -169,7 +167,7 @@ body::before{
   content:'';
   position:absolute;
   inset:0;
-  background:rgba(8, 3, 20, 0.72);
+  background:transparent;
   z-index:0;
 }
 
