@@ -75,7 +75,11 @@ function buildStartAppLink(botUsername) {
   return `https://max.ru/${encodeURIComponent(u)}?startapp`;
 }
 
-async function sendWelcomeToChat({ token, chatId, user }) {
+async function sendWelcome({ token, userId, chatId, user }) {
+  const targetUserId = asString(userId).trim();
+  const targetChatId = asString(chatId).trim();
+  if (!targetUserId && !targetChatId) return;
+
   const userName =
     asString(user?.first_name).trim() ||
     asString(user?.name).trim() ||
@@ -109,7 +113,12 @@ async function sendWelcomeToChat({ token, chatId, user }) {
       },
     ],
   };
-  await maxApiRequest(`/messages?chat_id=${encodeURIComponent(chatId)}`, {
+
+  const query = targetChatId
+    ? `chat_id=${encodeURIComponent(targetChatId)}`
+    : `user_id=${encodeURIComponent(targetUserId)}`;
+
+  await maxApiRequest(`/messages?${query}`, {
     token,
     method: "POST",
     body: payload,
@@ -133,29 +142,36 @@ async function handleMaxUpdate(event, updateBody) {
   const updateType = asString(updateBody?.update_type).trim();
   if (updateType === "bot_started") {
     const chatId = asString(updateBody?.chat_id).trim();
-    if (chatId) {
-      try {
-        await sendWelcomeToChat({
-          token,
-          chatId,
-          user: updateBody?.user,
-        });
-      } catch (_e) {
-        // do not fail webhook delivery
-      }
+    const userId = asString(updateBody?.user?.user_id).trim();
+    try {
+      await sendWelcome({
+        token,
+        chatId,
+        userId,
+        user: updateBody?.user,
+      });
+    } catch (_e) {
+      // do not fail webhook delivery
     }
   }
 
   if (updateType === "message_created") {
-    const chatId = asString(updateBody?.message?.chat_id).trim();
     const text = asString(updateBody?.message?.body?.text).trim();
     const isStart = text === "/start" || text.toLowerCase() === "start";
-    if (chatId && isStart) {
+    if (isStart) {
+      const sender = updateBody?.message?.sender;
+      const userId = asString(sender?.user_id).trim();
+      const recipient = updateBody?.message?.recipient;
+      const recipientType = asString(recipient?.type).trim().toLowerCase();
+      const chatId =
+        recipientType === "chat" ? asString(recipient?.chat_id).trim() : "";
+
       try {
-        await sendWelcomeToChat({
+        await sendWelcome({
           token,
+          userId,
           chatId,
-          user: updateBody?.message?.sender,
+          user: sender,
         });
       } catch (_e) {
         // ignore
