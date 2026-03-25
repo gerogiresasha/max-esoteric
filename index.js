@@ -98,7 +98,17 @@ async function sendWelcomeToChat({ token, chatId, user }) {
     `Совместимость, Карта дня, Имя и Сонник.\n\n` +
     `Если кнопки не видно — открой ссылку: ${link}`;
 
-  const payload = { text };
+  const payload = {
+    text,
+    attachments: [
+      {
+        type: "inline_keyboard",
+        payload: {
+          buttons: [[{ type: "link", text: "Открыть", url: link }]],
+        },
+      },
+    ],
+  };
   await maxApiRequest(`/messages?chat_id=${encodeURIComponent(chatId)}`, {
     token,
     method: "POST",
