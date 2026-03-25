@@ -5,6 +5,7 @@ const YC_COMPLETION_URL =
   "https://llm.api.cloud.yandex.net/v1/chat/completions";
 
 const YUKASSA_API_URL = "https://api.yookassa.ru/v3/payments";
+const MAX_API_URL = "https://platform-api.max.ru";
 const INSTRUMENT_PRICES = {
   compatibility: 14900,
   tarot: 9900,
@@ -12,6 +13,148 @@ const INSTRUMENT_PRICES = {
   dreambook: 9900,
 };
 const payments = new Map(); // хранилище статусов в памяти
+
+function getHeader(headers, name) {
+  if (!headers || typeof headers !== "object") return "";
+  const target = String(name || "").toLowerCase();
+  for (const [k, v] of Object.entries(headers)) {
+    if (String(k).toLowerCase() === target) return asString(v);
+  }
+  return "";
+}
+
+function isMaxUpdateBody(body) {
+  return (
+    body &&
+    typeof body === "object" &&
+    typeof body.update_type === "string" &&
+    body.update_type.trim().length > 0
+  );
+}
+
+async function maxApiRequest(path, { token, method = "GET", body } = {}) {
+  if (!token) throw new Error("MAX_BOT_TOKEN не задан");
+  const url = `${MAX_API_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+  const resp = await fetch(url, {
+    method,
+    headers: {
+      Authorization: token,
+      "Content-Type": "application/json",
+    },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+
+  const text = await resp.text();
+  let json;
+  try {
+    json = text ? JSON.parse(text) : null;
+  } catch {
+    json = null;
+  }
+
+  if (!resp.ok) {
+    const msg =
+      json?.message ||
+      json?.error ||
+      (text && text.length < 2000 ? text : "") ||
+      `MAX API HTTP ${resp.status}`;
+    throw new Error(msg);
+  }
+  return json;
+}
+
+async function getBotUsername(token) {
+  const me = await maxApiRequest("/me", { token, method: "GET" });
+  const username = asString(me?.username).trim();
+  return username || "";
+}
+
+function buildStartAppLink(botUsername) {
+  const u = asString(botUsername).trim().replace(/^@/, "");
+  if (!u) return "";
+  return `https://max.ru/${encodeURIComponent(u)}?startapp`;
+}
+
+async function sendWelcomeToChat({ token, chatId, user }) {
+  const userName =
+    asString(user?.first_name).trim() ||
+    asString(user?.name).trim() ||
+    "друг";
+
+  let startAppLink = "";
+  try {
+    const botUsername = await getBotUsername(token);
+    startAppLink = buildStartAppLink(botUsername);
+  } catch {
+    // ignore
+  }
+
+  const appFallback = "https://gerogiresasha.github.io/max-esoteric/";
+  const link = startAppLink || appFallback;
+
+  const text =
+    `Привет, ${userName}!\n\n` +
+    `Нажми кнопку «Открыть» внизу чата — там 4 расклада: ` +
+    `Совместимость, Карта дня, Имя и Сонник.\n\n` +
+    `Если кнопки не видно — открой ссылку: ${link}`;
+
+  const payload = { text };
+  await maxApiRequest(`/messages?chat_id=${encodeURIComponent(chatId)}`, {
+    token,
+    method: "POST",
+    body: payload,
+  });
+}
+
+async function handleMaxUpdate(event, updateBody) {
+  const token = process.env.MAX_BOT_TOKEN || "";
+  if (!token) throw new Error("Не задан MAX_BOT_TOKEN в env");
+
+  const expectedSecret = process.env.MAX_WEBHOOK_SECRET || "";
+  if (expectedSecret) {
+    const actualSecret =
+      getHeader(event?.headers, "x-max-bot-api-secret") ||
+      getHeader(event?.headers, "X-Max-Bot-Api-Secret");
+    if (!actualSecret || actualSecret !== expectedSecret) {
+      return jsonResponse(401, { success: false, error: "Unauthorized" });
+    }
+  }
+
+  const updateType = asString(updateBody?.update_type).trim();
+  if (updateType === "bot_started") {
+    const chatId = asString(updateBody?.chat_id).trim();
+    if (chatId) {
+      try {
+        await sendWelcomeToChat({
+          token,
+          chatId,
+          user: updateBody?.user,
+        });
+      } catch (_e) {
+        // do not fail webhook delivery
+      }
+    }
+  }
+
+  if (updateType === "message_created") {
+    const chatId = asString(updateBody?.message?.chat_id).trim();
+    const text = asString(updateBody?.message?.body?.text).trim();
+    const isStart = text === "/start" || text.toLowerCase() === "start";
+    if (chatId && isStart) {
+      try {
+        await sendWelcomeToChat({
+          token,
+          chatId,
+          user: updateBody?.message?.sender,
+        });
+      } catch (_e) {
+        // ignore
+      }
+    }
+  }
+
+  return jsonResponse(200, { success: true });
+}
 
 function corsHeaders() {
   return {
@@ -368,6 +511,17 @@ exports.handler = async function handler(event) {
       body = raw ? JSON.parse(raw) : {};
     } catch {
       return jsonResponse(400, { success: false, error: "Некорректный JSON" });
+    }
+
+    // MAX webhook updates (welcome message, etc.)
+    if (Array.isArray(body) && body.every((u) => isMaxUpdateBody(u))) {
+      for (const u of body) {
+        await handleMaxUpdate(event, u);
+      }
+      return jsonResponse(200, { success: true });
+    }
+    if (isMaxUpdateBody(body)) {
+      return await handleMaxUpdate(event, body);
     }
 
     const action = asString(body?.action).trim();
