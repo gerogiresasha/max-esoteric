@@ -7,6 +7,7 @@
   }
 
   const CANVAS_SIZE = 1080
+  const SHARE_MODAL_ID = 'share-result-modal'
 
   function clampText(input, maxChars) {
     const raw = String(input || '').trim()
@@ -15,11 +16,15 @@
     return `${raw.slice(0, maxChars).replace(/\s+$/g, '')}...`
   }
 
-  function buildShareText(config, text) {
+  function buildShareText(config, text, opts) {
+    const options = opts || {}
     const previewRaw = String(text || '').replace(/\s+/g, ' ').trim()
     const preview = clampText(previewRaw, 120) || '...'
     const link = typeof APP_LINK === 'string' ? APP_LINK : ''
-    return `${config.emoji} ${config.title}\n${preview}\n\n${link}`.trim()
+    const includeLink = options.includeLink !== false
+    const base = `${config.emoji} ${config.title}\n${preview}`.trim()
+    if (!includeLink || !link) return base
+    return `${base}\n\n${link}`.trim()
   }
 
   function seedFromString(str) {
@@ -247,6 +252,221 @@
     a.remove()
   }
 
+  function openExternal(url) {
+    if (!url) return
+    try {
+      if (typeof WebApp !== 'undefined' && WebApp) {
+        if (typeof WebApp.openLink === 'function') {
+          WebApp.openLink(url)
+          return
+        }
+        if (typeof WebApp.openUrl === 'function') {
+          WebApp.openUrl(url)
+          return
+        }
+      }
+    } catch (_e) {
+      // ignore
+    }
+    try {
+      const win = window.open(url, '_blank', 'noopener,noreferrer')
+      if (win) return
+    } catch (_e) {
+      // ignore
+    }
+    window.location.href = url
+  }
+
+  function buildTelegramShareUrl(url, text) {
+    const u = typeof url === 'string' ? url : ''
+    const t = String(text || '')
+    const qs = []
+    if (u) qs.push(`url=${encodeURIComponent(u)}`)
+    if (t) qs.push(`text=${encodeURIComponent(t)}`)
+    return `https://t.me/share/url?${qs.join('&')}`.replace(/\?$/, '')
+  }
+
+  function buildVkShareUrl(url, title, description) {
+    const u = typeof url === 'string' ? url : ''
+    const t = String(title || '')
+    const d = String(description || '')
+    const qs = []
+    if (u) qs.push(`url=${encodeURIComponent(u)}`)
+    if (t) qs.push(`title=${encodeURIComponent(t)}`)
+    if (d) qs.push(`description=${encodeURIComponent(d)}`)
+    return `https://vk.com/share.php?${qs.join('&')}`.replace(/\?$/, '')
+  }
+
+  async function copyText(text) {
+    const value = String(text || '')
+    if (!value) return false
+    try {
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+        await navigator.clipboard.writeText(value)
+        return true
+      }
+    } catch (_e) {
+      // fall through
+    }
+
+    try {
+      const ta = document.createElement('textarea')
+      ta.value = value
+      ta.setAttribute('readonly', 'true')
+      ta.style.position = 'fixed'
+      ta.style.left = '-9999px'
+      ta.style.top = '-9999px'
+      document.body.appendChild(ta)
+      ta.select()
+      const ok = document.execCommand('copy')
+      ta.remove()
+      return !!ok
+    } catch (_e) {
+      return false
+    }
+  }
+
+  function closeShareModal(overlay) {
+    if (!overlay) return
+    try {
+      overlay.classList.remove('share-open')
+      setTimeout(() => overlay.remove(), 180)
+    } catch (_e) {
+      overlay.remove()
+    }
+  }
+
+  function showShareModal(opts) {
+    const instrument = opts && opts.instrument
+    const cfg = SHARE_CONFIG[instrument]
+    if (!cfg) return
+
+    const text = opts && opts.text
+    const shareTextWithLink = opts && opts.shareTextWithLink
+    const shareTextNoLink = opts && opts.shareTextNoLink
+    const dataUrl = opts && opts.dataUrl
+
+    const prev = document.getElementById(SHARE_MODAL_ID)
+    if (prev) prev.remove()
+
+    const overlay = document.createElement('div')
+    overlay.id = SHARE_MODAL_ID
+    overlay.className = 'share-overlay'
+    overlay.setAttribute('role', 'dialog')
+    overlay.setAttribute('aria-modal', 'true')
+
+    const preview = clampText(String(text || '').replace(/\s+/g, ' ').trim(), 240)
+    const appLink = typeof APP_LINK === 'string' ? APP_LINK : ''
+
+    overlay.innerHTML = `
+      <div class="share-card">
+        <div class="share-head">
+          <div class="share-title"></div>
+          <button class="share-close" type="button" aria-label="Закрыть">✕</button>
+        </div>
+        <div class="share-preview" aria-label="Текст для шаринга"></div>
+        <div class="stack">
+          <div class="grid-2">
+            <button class="btn-secondary" type="button" data-share-telegram>Telegram</button>
+            <button class="btn-secondary" type="button" data-share-vk>ВК</button>
+          </div>
+          <button class="btn-secondary" type="button" data-share-copy>Скопировать текст</button>
+          <button class="btn-secondary" type="button" data-share-download>Скачать карточку</button>
+          <button class="btn-primary" type="button" data-share-max style="display:none;">Отправить в чат Max</button>
+          <small class="share-hint">Подсказка: чтобы прикрепить картинку в соцсети — скачай карточку и добавь её как фото.</small>
+        </div>
+      </div>
+    `
+
+    const titleEl = overlay.querySelector('.share-title')
+    if (titleEl) titleEl.textContent = `${cfg.emoji} ${cfg.title}`
+    const previewEl = overlay.querySelector('.share-preview')
+    if (previewEl) previewEl.textContent = preview || '...'
+
+    function isMaxShareAvailable() {
+      try {
+        return (
+          typeof IS_MAX === 'boolean' &&
+          IS_MAX &&
+          typeof WebApp !== 'undefined' &&
+          WebApp &&
+          typeof WebApp.shareMaxContent === 'function'
+        )
+      } catch (_e) {
+        return false
+      }
+    }
+
+    const maxBtn = overlay.querySelector('[data-share-max]')
+    if (maxBtn && isMaxShareAvailable()) {
+      maxBtn.style.display = 'inline-flex'
+      maxBtn.addEventListener('click', function () {
+        try {
+          WebApp.shareMaxContent({ image: dataUrl, text: shareTextWithLink, link: appLink })
+        } catch (_e) {
+          try {
+            WebApp.shareMaxContent({ text: shareTextWithLink, link: appLink })
+          } catch (_e2) {
+            if (dataUrl) downloadDataUrl(dataUrl)
+          }
+        }
+        closeShareModal(overlay)
+      })
+    }
+
+    const closeBtn = overlay.querySelector('.share-close')
+    if (closeBtn) closeBtn.addEventListener('click', () => closeShareModal(overlay))
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeShareModal(overlay)
+    })
+
+    const tgBtn = overlay.querySelector('[data-share-telegram]')
+    if (tgBtn) {
+      tgBtn.addEventListener('click', function () {
+        const url = buildTelegramShareUrl(appLink, shareTextNoLink)
+        openExternal(url)
+        closeShareModal(overlay)
+      })
+    }
+
+    const vkBtn = overlay.querySelector('[data-share-vk]')
+    if (vkBtn) {
+      vkBtn.addEventListener('click', function () {
+        const title = `${cfg.emoji} ${cfg.title}`
+        const desc = clampText(String(text || '').replace(/\s+/g, ' ').trim(), 240)
+        const url = buildVkShareUrl(appLink, title, desc)
+        openExternal(url)
+        closeShareModal(overlay)
+      })
+    }
+
+    const copyBtn = overlay.querySelector('[data-share-copy]')
+    if (copyBtn) {
+      copyBtn.addEventListener('click', async function () {
+        const ok = await copyText(shareTextWithLink)
+        if (ok) {
+          copyBtn.textContent = 'Скопировано'
+          setTimeout(() => {
+            copyBtn.textContent = 'Скопировать текст'
+          }, 1200)
+        } else {
+          alert('Не получилось скопировать. Можно выделить и скопировать вручную.')
+        }
+      })
+    }
+
+    const dlBtn = overlay.querySelector('[data-share-download]')
+    if (dlBtn) {
+      dlBtn.addEventListener('click', function () {
+        if (dataUrl) downloadDataUrl(dataUrl)
+        closeShareModal(overlay)
+      })
+    }
+
+    document.body.appendChild(overlay)
+    requestAnimationFrame(() => overlay.classList.add('share-open'))
+  }
+
   window.shareResult = async function shareResult(instrument, text) {
     const cfg = SHARE_CONFIG[instrument]
     if (!cfg) {
@@ -255,28 +475,10 @@
     }
 
     await loadFonts()
-    const shareText = buildShareText(cfg, text)
+    const shareTextWithLink = buildShareText(cfg, text, { includeLink: true })
+    const shareTextNoLink = buildShareText(cfg, text, { includeLink: false })
     const { dataUrl } = drawCard(instrument, text)
 
-    if (typeof IS_MAX === 'boolean' && IS_MAX) {
-      try {
-        if (typeof WebApp !== 'undefined' && WebApp && typeof WebApp.shareMaxContent === 'function') {
-          try {
-            WebApp.shareMaxContent({ image: dataUrl, text: shareText, link: APP_LINK })
-            return
-          } catch (_e) {
-            WebApp.shareMaxContent({ text: shareText, link: APP_LINK })
-            return
-          }
-        }
-      } catch (_e) {
-        // fall through to download
-      }
-      downloadDataUrl(dataUrl)
-      return
-    }
-
-    downloadDataUrl(dataUrl)
-    alert('Карточка сохранена. В Max она отправляется напрямую в чат.')
+    showShareModal({ instrument, text, dataUrl, shareTextWithLink, shareTextNoLink })
   }
 })()
