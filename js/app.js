@@ -43,6 +43,63 @@ function initMaxBridge() {
 
 initMaxBridge()
 
+function showWelcomeOverlay() {
+  const key = 'oracle_welcome_dismissed_v1'
+  try {
+    if (localStorage.getItem(key) === '1') return
+  } catch (_e) {
+    // ignore (private mode / blocked storage)
+  }
+
+  const overlay = document.createElement('div')
+  overlay.className = 'welcome-overlay'
+  overlay.setAttribute('role', 'dialog')
+  overlay.setAttribute('aria-modal', 'true')
+
+  const card = document.createElement('div')
+  card.className = 'welcome-card'
+  card.setAttribute('role', 'document')
+
+  const title = document.createElement('div')
+  title.className = 'welcome-title'
+  const name = String(currentUser?.first_name || '').trim()
+  title.textContent = name ? `Привет, ${name}` : 'Привет'
+
+  const text = document.createElement('div')
+  text.className = 'welcome-text'
+  text.textContent =
+    'Чтобы прикоснуться к правде, выбери раздел снизу и нажми кнопку — я дам расклад.'
+
+  const btn = document.createElement('button')
+  btn.type = 'button'
+  btn.className = 'btn-primary'
+  btn.textContent = 'Начать'
+
+  function close() {
+    try {
+      localStorage.setItem(key, '1')
+    } catch (_e) {
+      // ignore
+    }
+    try {
+      overlay.remove()
+    } catch (_e) {
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay)
+    }
+  }
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) close()
+  })
+  btn.addEventListener('click', close)
+
+  card.appendChild(title)
+  card.appendChild(text)
+  card.appendChild(btn)
+  overlay.appendChild(card)
+  document.body.appendChild(overlay)
+}
+
 function showScreen(name) {
   if (!SCREENS.includes(name)) return
 
@@ -122,6 +179,7 @@ function renderApp() {
 
 document.addEventListener('DOMContentLoaded', () => {
   renderApp()
+  showWelcomeOverlay()
   if (typeof window.initCompatibility === 'function') window.initCompatibility()
   if (typeof window.initTarot === 'function') window.initTarot()
   if (typeof window.initNumerology === 'function') window.initNumerology()
