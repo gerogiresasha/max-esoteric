@@ -17,6 +17,8 @@ function initMaxBridge() {
       first_name: user?.first_name || '',
       last_name: user?.last_name || '',
       username: user?.username || '',
+      gender: user?.gender,
+      sex: user?.sex,
     }
 
     if (WebApp.BackButton) {
@@ -42,6 +44,9 @@ function initMaxBridge() {
 }
 
 initMaxBridge()
+if (window.analytics && typeof window.analytics.init === 'function') {
+  window.analytics.init()
+}
 
 function showWelcomeOverlay() {
   const key = 'oracle_welcome_dismissed_v1'
@@ -117,6 +122,14 @@ function showScreen(name) {
   })
 
   currentScreen = name
+
+  try {
+    if (window.analytics && typeof window.analytics.trackPageView === 'function') {
+      window.analytics.trackPageView(name)
+    }
+  } catch (_e) {
+    // ignore analytics errors
+  }
 }
 
 function iconImg(name) {

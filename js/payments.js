@@ -177,6 +177,14 @@
   window.showPaymentModal = function showPaymentModal(instrument, onSuccess) {
     ensureStyles()
 
+    try {
+      if (window.analytics && typeof window.analytics.trackPaymentInit === 'function') {
+        window.analytics.trackPaymentInit(instrument)
+      }
+    } catch (_e) {
+      // ignore analytics errors
+    }
+
     const price = PRICES[instrument]
     if (!price) {
       console.warn('[payments] Unknown instrument:', instrument)

@@ -373,7 +373,7 @@
           <button class="btn-secondary" type="button" data-share-copy>Скопировать текст</button>
           <button class="btn-secondary" type="button" data-share-download>Скачать карточку</button>
           <button class="btn-primary" type="button" data-share-max style="display:none;">Отправить в чат Max</button>
-          <small class="share-hint">Подсказка: чтобы прикрепить картинку в соцсети — скачай карточку и добавь её как фото.</small>
+          <small class="share-hint">Подсказка: чтобы прикрепить картинку в соцсети - скачай карточку и добавь ее как фото.</small>
         </div>
       </div>
     `
@@ -472,6 +472,14 @@
     if (!cfg) {
       console.warn('[share] Unknown instrument:', instrument)
       return
+    }
+
+    try {
+      if (window.analytics && typeof window.analytics.trackShare === 'function') {
+        window.analytics.trackShare(instrument)
+      }
+    } catch (_e) {
+      // ignore analytics errors
     }
 
     await loadFonts()
